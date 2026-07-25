@@ -8,7 +8,7 @@ import type {
 import type { AssistantMessage, TextContent, UserMessage } from "@earendil-works/pi-ai";
 import { writeFile } from "node:fs/promises";
 import { createTranslator, safeTranslate } from "./backends.ts";
-import { loadConfig, saveConfig, type Config } from "./config.ts";
+import { loadConfig, saveConfig, type BackendName, type Config, type OutputMode } from "./config.ts";
 import { openOriginalPanel } from "./panel.ts";
 import type { PiTranslateMeta } from "./types.ts";
 
@@ -128,6 +128,71 @@ export default function (pi: ExtensionAPI): void {
         `Translation ${cfg.enabled ? "enabled" : "disabled"}`,
         "info",
       );
+    },
+  });
+
+  pi.registerCommand("translate-backend", {
+    description: "Set translation backend",
+    handler: async (args, ctx) => {
+      const name = args.trim() as BackendName;
+      const valid: BackendName[] = ["google", "mymemory", "libretranslate", "llm"];
+      if (!valid.includes(name)) {
+        ctx.ui.notify(`Usage: /translate-backend <${valid.join("|")}>`, "warning");
+        return;
+      }
+      cfg.backend = name;
+      contextCache.clear();
+      saveConfig(cfg);
+      ctx.ui.notify(`Translation backend set to ${name}`, "info");
+    },
+  });
+
+  pi.registerCommand("translate-lang", {
+    description: "Set source language code",
+    handler: async (args, ctx) => {
+      const code = args.trim().toLowerCase();
+      if (!code || code.length > 5) {
+        ctx.ui.notify("Usage: /translate-lang <code> (e.g. it, es, fr)", "warning");
+        return;
+      }
+      cfg.sourceLang = code;
+      contextCache.clear();
+      saveConfig(cfg);
+      updateStatus(cfg, ctx);
+      ctx.ui.notify(`Source language set to ${code}`, "info");
+    },
+  });
+
+  pi.registerCommand("translate-protect", {
+    description: "Toggle code/path protection during translation",
+    handler: async (_args, ctx) => {
+      cfg.protectCode = !cfg.protectCode;
+      saveConfig(cfg);
+      ctx.ui.notify(`Code protection ${cfg.protectCode ? "enabled" : "disabled"}`, "info");
+    },
+  });
+
+  pi.registerCommand("translate-mode", {
+    description: "Toggle output mode (translate or native)",
+    handler: async (_args, ctx) => {
+      cfg.outputMode = cfg.outputMode === "translate" ? "native" : "translate";
+      saveConfig(cfg);
+      ctx.ui.notify(`Output mode: ${cfg.outputMode}`, "info");
+    },
+  });
+
+  pi.registerCommand("translate-status", {
+    description: "Show current translation settings",
+    handler: async (_args, ctx) => {
+      const lines = [
+        `enabled: ${cfg.enabled}`,
+        `backend: ${cfg.backend}`,
+        `sourceLang: ${cfg.sourceLang}`,
+        `outputMode: ${cfg.outputMode}`,
+        `protectCode: ${cfg.protectCode}`,
+        `shortcut: ${cfg.originalShortcut}`,
+      ];
+      ctx.ui.notify(lines.join(" | "), "info");
     },
   });
 
