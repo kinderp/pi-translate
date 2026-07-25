@@ -141,6 +141,7 @@ export default function (pi: ExtensionAPI): void {
         return;
       }
       cfg.backend = name;
+      contextCache.clear();
       saveConfig(cfg);
       ctx.ui.notify(`Translation backend set to ${name}`, "info");
     },
@@ -155,6 +156,7 @@ export default function (pi: ExtensionAPI): void {
         return;
       }
       cfg.sourceLang = code;
+      contextCache.clear();
       saveConfig(cfg);
       updateStatus(cfg, ctx);
       ctx.ui.notify(`Source language set to ${code}`, "info");
