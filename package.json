@@ -1,14 +1,17 @@
 {
   "name": "pi-translate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "pi extension that translates prompts to English and model responses back to the source language",
   "type": "module",
   "main": "translate/index.ts",
-  "scripts": {
-    "test": "echo 'No automated tests yet' && exit 0"
-  },
+  "files": [
+    "translate",
+    "README.md",
+    "LICENSE"
+  ],
   "keywords": [
     "pi",
+    "pi-package",
     "pi-extension",
     "translation",
     "italian",
@@ -17,6 +20,12 @@
   "author": "kinderp",
   "license": "MIT",
   "pi": {
-    "entry": "translate/index.ts"
+    "extensions": ["./translate"],
+    "image": "https://raw.githubusercontent.com/kinderp/pi-translate/main/docs/screenshots/chat-it.svg"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
   }
 }
