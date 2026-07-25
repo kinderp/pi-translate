@@ -6,8 +6,10 @@ import type {
   MessageEndEvent,
 } from "@earendil-works/pi-coding-agent";
 import type { AssistantMessage, TextContent, UserMessage } from "@earendil-works/pi-ai";
+import { writeFile } from "node:fs/promises";
 import { createTranslator, safeTranslate } from "./backends.ts";
 import { loadConfig, saveConfig, type Config } from "./config.ts";
+import { openOriginalPanel } from "./panel.ts";
 import type { PiTranslateMeta } from "./types.ts";
 
 const STATUS_PREFIX = "⇄";
@@ -64,6 +66,13 @@ function translateAssistantContent(
   return results;
 }
 
+function originalToText(original: AssistantMessage["content"]): string {
+  return original
+    .map((c) => (c.type === "text" ? c.text : ""))
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 function setTranslatedContent(
   msg: UserMessage,
   enText: string,
@@ -98,12 +107,14 @@ export default function (pi: ExtensionAPI): void {
   const pending = new Map<string, string>();
   const contextCache = new Map<string, string>();
   let lastErrorNotified = false;
+  let lastAssistantOriginal: (AssistantMessage & { piTranslate: PiTranslateMeta }) | undefined;
 
   pi.on("session_start", async (_event, ctx) => {
     cfg = loadConfig();
     pending.clear();
     contextCache.clear();
     lastErrorNotified = false;
+    lastAssistantOriginal = undefined;
     updateStatus(cfg, ctx);
   });
 
@@ -118,6 +129,48 @@ export default function (pi: ExtensionAPI): void {
         "info",
       );
     },
+  });
+
+  pi.registerCommand("translate-original", {
+    description: "Show the original English response in a panel",
+    handler: async (_args, ctx) => {
+      if (!lastAssistantOriginal) {
+        ctx.ui.notify("No original English response available yet", "warning");
+        return;
+      }
+      openOriginalPanel(ctx, lastAssistantOriginal);
+    },
+  });
+
+  pi.registerCommand("translate-mirror", {
+    description: "Write the original English response to a file",
+    handler: async (args, ctx) => {
+      const path = args.trim();
+      if (!path) {
+        ctx.ui.notify("Usage: /translate-mirror <file-path>", "warning");
+        return;
+      }
+      if (!lastAssistantOriginal) {
+        ctx.ui.notify("No original English response available yet", "warning");
+        return;
+      }
+      const text = originalToText(lastAssistantOriginal.piTranslate.original ?? []);
+      try {
+        await writeFile(path, text, "utf8");
+        ctx.ui.notify(`Original English written to ${path}`, "info");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        ctx.ui.notify(`Failed to write mirror: ${message}`, "error");
+      }
+    },
+  });
+
+  pi.registerShortcut("ctrl+shift+e", async (ctx) => {
+    if (!lastAssistantOriginal) {
+      ctx.ui.notify("No original English response available yet", "warning");
+      return;
+    }
+    openOriginalPanel(ctx, lastAssistantOriginal);
   });
 
   pi.on("input", async (event: InputEvent, ctx) => {
@@ -205,6 +258,7 @@ export default function (pi: ExtensionAPI): void {
         };
         (msg as AssistantMessage & { piTranslate: PiTranslateMeta }).piTranslate = meta;
         msg.content = translatedContent;
+        lastAssistantOriginal = msg as AssistantMessage & { piTranslate: PiTranslateMeta };
         return { message: msg };
       } finally {
         ctx.ui.setWorkingMessage();
