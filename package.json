@@ -21,7 +21,7 @@
   "license": "MIT",
   "pi": {
     "extensions": ["./translate"],
-    "image": "docs/screenshots/chat-it.svg"
+    "image": "https://raw.githubusercontent.com/kinderp/pi-translate/main/docs/screenshots/chat-it.svg"
   },
   "peerDependencies": {
     "@earendil-works/pi-ai": "*",
