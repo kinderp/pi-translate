@@ -46,7 +46,7 @@ Default config is written to `~/.pi/agent/translate.json`.
 | Command | What it does |
 |---|---|
 | `/translate` | Toggle the whole extension on or off. |
-| `/translate-backend <google\|mymemory\|libretranslate\|llm>` | Switch translation backend on the fly. |
+| `/translate-backend <backend>` | Switch backend: `google`, `mymemory`, `libretranslate`, `llm`. |
 | `/translate-original` | Open the original-English overlay panel. |
 | `Ctrl+Shift+E` | Same as `/translate-original`, instant. |
 
