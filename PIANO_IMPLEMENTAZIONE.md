@@ -13,7 +13,7 @@
 - [#4](https://github.com/kinderp/pi-translate/issues/4) pipeline output EN→IT → PR [#12](https://github.com/kinderp/pi-translate/pull/12)
 - [#5](https://github.com/kinderp/pi-translate/issues/5) pannello originale + mirror → PR [#13](https://github.com/kinderp/pi-translate/pull/13)
 - [#6](https://github.com/kinderp/pi-translate/issues/6) backend extra e comandi di configurazione → PR [#14](https://github.com/kinderp/pi-translate/pull/14)
-- [#7](https://github.com/kinderp/pi-translate/issues/7) rifinitura e documentazione → PR in corso
+- [#7](https://github.com/kinderp/pi-translate/issues/7) rifinitura e documentazione → PR [#15](https://github.com/kinderp/pi-translate/pull/15)
 
 ## Setup (2 min)
 
