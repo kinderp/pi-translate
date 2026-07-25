@@ -26,18 +26,30 @@
 ## 🚀 Install
 
 ```bash
-# clone anywhere
-git clone https://github.com/kinderp/pi-translate.git
+# install globally for all pi sessions
+pi install npm:pi-translate
 
-# run once
-cd pi-translate
-pi -e ./translate/index.ts
-
-# or install permanently
-pi install ./translate/index.ts
+# or install only in the current project
+pi install -l npm:pi-translate
 ```
 
-Default config is written to `~/.pi/agent/translate.json`.
+`pi` downloads the package, adds it to your settings and loads it automatically. Default config is written to `~/.pi/agent/translate.json`.
+
+### Try without installing
+
+```bash
+pi -e npm:pi-translate
+```
+
+### Install from source
+
+If you prefer, you can still install directly from GitHub or a local path:
+
+```bash
+pi install git:github.com/kinderp/pi-translate@v1.0.1
+# or
+pi install /path/to/pi-translate
+```
 
 ---
 
