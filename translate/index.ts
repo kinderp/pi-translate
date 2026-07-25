@@ -39,6 +39,31 @@ function extractText(content: string | (TextContent | { type: "image" })[]): str
     .join("\n");
 }
 
+function translateAssistantContent(
+  content: AssistantMessage["content"],
+  translator: ReturnType<typeof createTranslator>,
+  targetLang: string,
+  protectCode: boolean,
+  signal: AbortSignal | undefined,
+): Promise<AssistantMessage["content"]> {
+  const results: AssistantMessage["content"] = [];
+  for (const c of content) {
+    if (c.type === "text") {
+      const result = await safeTranslate(
+        translator,
+        c.text,
+        "en",
+        targetLang,
+        { protectCode, signal },
+      );
+      results.push({ type: "text", text: result.text });
+    } else {
+      results.push(c);
+    }
+  }
+  return results;
+}
+
 function setTranslatedContent(
   msg: UserMessage,
   enText: string,
@@ -129,7 +154,7 @@ export default function (pi: ExtensionAPI): void {
     return { action: "continue" };
   });
 
-  pi.on("message_end", async (event: MessageEndEvent) => {
+  pi.on("message_end", async (event: MessageEndEvent, ctx) => {
     const msg = event.message;
     if (!cfg.enabled) return;
 
@@ -149,6 +174,43 @@ export default function (pi: ExtensionAPI): void {
       return { message: msg };
     }
 
+    if (isAssistantMessage(msg)) {
+      if (msg.stopReason === "error" || cfg.outputMode === "native") {
+        return;
+      }
+
+      const hasText = msg.content.some((c) => c.type === "text" && c.text.trim());
+      if (!hasText) {
+        return;
+      }
+
+      const translator = createTranslator(cfg, ctx.modelRegistry);
+      const originalContent = msg.content;
+
+      ctx.ui.setWorkingMessage("Translating response…");
+      try {
+        const translatedContent = await translateAssistantContent(
+          originalContent,
+          translator,
+          cfg.sourceLang,
+          cfg.protectCode,
+          ctx.signal,
+        );
+
+        const meta: PiTranslateMeta = {
+          sourceLang: "en",
+          targetLang: cfg.sourceLang,
+          backend: cfg.backend,
+          original: originalContent,
+        };
+        (msg as AssistantMessage & { piTranslate: PiTranslateMeta }).piTranslate = meta;
+        msg.content = translatedContent;
+        return { message: msg };
+      } finally {
+        ctx.ui.setWorkingMessage();
+      }
+    }
+
     return;
   });
 
@@ -159,6 +221,14 @@ export default function (pi: ExtensionAPI): void {
     const translator = createTranslator(cfg, ctx.modelRegistry);
 
     for (const msg of messages) {
+      if (isAssistantMessage(msg)) {
+        const original = (msg as AssistantMessage & { piTranslate?: PiTranslateMeta }).piTranslate?.original;
+        if (original !== undefined) {
+          msg.content = original;
+        }
+        continue;
+      }
+
       if (!isUserMessage(msg)) continue;
 
       const translated = (msg as UserMessage & { piTranslate?: PiTranslateMeta }).piTranslate?.en;
