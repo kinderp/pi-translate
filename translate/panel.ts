@@ -87,10 +87,19 @@ export function openOriginalPanel(
   message: AssistantMessage & { piTranslate: PiTranslateMeta },
 ): void {
   if (!ctx.hasUI) return;
-  const theme = ctx.ui.theme;
-  const panel = new OriginalPanel(theme, {
-    message,
-    onClose: () => ctx.ui.custom(undefined),
-  });
-  ctx.ui.custom(panel, { overlay: true, anchor: "right-center", width: "55%" });
+  void ctx.ui.custom<undefined>(
+    (_tui, theme, _keybindings, done) =>
+      new OriginalPanel(theme, {
+        message,
+        onClose: () => done(undefined),
+      }),
+    {
+      overlay: true,
+      overlayOptions: {
+        anchor: "right-center",
+        width: "55%",
+        minWidth: 40,
+      },
+    },
+  );
 }
