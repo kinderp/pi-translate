@@ -1,7 +1,19 @@
 # Piano di implementazione — pi-translate
 
+> **Stato:** implementazione completata. Tutti gli issue figli (#1–#7) sono stati risolti e mergiati in `main`. Questo documento descrive il piano originale; per l'uso dell'estensione vedere `README.md`.
+
 > Da eseguire con **kimi 2.7** dopo aver letto `DESIGN.md`.
 > Ogni step è indipendentemente testabile. Tempi stimati con agente che scrive + umano che testa.
+
+## Issue e PR completate
+
+- [#1](https://github.com/kinderp/pi-translate/issues/1) scheletro/config → PR [#9](https://github.com/kinderp/pi-translate/pull/9)
+- [#2](https://github.com/kinderp/pi-translate/issues/2) backend Google + protezione → PR [#10](https://github.com/kinderp/pi-translate/pull/10)
+- [#3](https://github.com/kinderp/pi-translate/issues/3) pipeline input IT→EN → PR [#11](https://github.com/kinderp/pi-translate/pull/11)
+- [#4](https://github.com/kinderp/pi-translate/issues/4) pipeline output EN→IT → PR [#12](https://github.com/kinderp/pi-translate/pull/12)
+- [#5](https://github.com/kinderp/pi-translate/issues/5) pannello originale + mirror → PR [#13](https://github.com/kinderp/pi-translate/pull/13)
+- [#6](https://github.com/kinderp/pi-translate/issues/6) backend extra e comandi di configurazione → PR [#14](https://github.com/kinderp/pi-translate/pull/14)
+- [#7](https://github.com/kinderp/pi-translate/issues/7) rifinitura e documentazione → PR [#15](https://github.com/kinderp/pi-translate/pull/15)
 
 ## Setup (2 min)
 
