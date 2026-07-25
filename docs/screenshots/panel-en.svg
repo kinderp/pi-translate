@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="340" viewBox="0 0 520 340">
+  <rect width="520" height="340" rx="12" fill="#0d1117"/>
+  <!-- main chat behind -->
+  <rect x="16" y="16" width="488" height="308" rx="8" fill="#161b22" stroke="#30363d" stroke-width="2" opacity="0.5"/>
+  <text x="40" y="70" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#8b949e">Here's a minimal HTTP server...</text>
+  <!-- overlay panel -->
+  <rect x="170" y="40" width="320" height="260" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+  <rect x="170" y="40" width="320" height="32" rx="10" fill="#1f6feb" opacity="0.2"/>
+  <text x="330" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#58a6ff" text-anchor="middle"> Original English </text>
+  <text x="190" y="100" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c9d1d9">Here's a minimal HTTP server</text>
+  <text x="190" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#c9d1d9">using Python's built-in module:</text>
+  <rect x="190" y="142" width="280" height="58" rx="6" fill="#0d1117"/>
+  <text x="202" y="164" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#ff7b72">bash</text>
+  <text x="202" y="186" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#c9d1d9">python -m http.server 8000</text>
+  <text x="190" y="252" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8b949e">↑/↓ scroll • Esc close</text>
+</svg>
