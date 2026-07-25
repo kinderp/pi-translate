@@ -1,7 +1,6 @@
 import { complete } from "@earendil-works/pi-ai/compat";
 import type { Model } from "@earendil-works/pi-ai";
 import type { ModelRegistry } from "@earendil-works/pi-coding-agent";
-import { protect } from "./protect.ts";
 import type { Config } from "./config.ts";
 
 export interface Translator {
@@ -127,8 +126,6 @@ function createLlmTranslator(cfg: Config, registry: ModelRegistry): Translator {
         throw new Error(auth.ok ? `No API key for ${cfg.llm.provider}` : auth.error);
       }
 
-      const { text: protectedText, restore } = protect(text);
-
       const prompt = `Translate the text below from ${from} to ${to}.
 Rules:
 - Output ONLY the translation, no explanations.
@@ -136,7 +133,7 @@ Rules:
 - If the text is already in ${to}, output it unchanged.
 
 Text:
-${protectedText}`;
+${text}`;
 
       const response = await complete(
         model,
@@ -152,12 +149,10 @@ ${protectedText}`;
         },
       );
 
-      const translated = response.content
+      return response.content
         .filter((c): c is { type: "text"; text: string } => c.type === "text")
         .map((c) => c.text)
         .join("\n");
-
-      return restore(translated);
     },
   };
 }
