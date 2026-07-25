@@ -179,6 +179,11 @@ export default function (pi: ExtensionAPI): void {
         return;
       }
 
+      const hasText = msg.content.some((c) => c.type === "text" && c.text.trim());
+      if (!hasText) {
+        return;
+      }
+
       const translator = createTranslator(cfg, ctx.modelRegistry);
       const originalContent = msg.content;
 
