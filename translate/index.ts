@@ -155,8 +155,13 @@ export default function (pi: ExtensionAPI): void {
         return;
       }
       const text = originalToText(lastAssistantOriginal.piTranslate.original ?? []);
-      await writeFile(path, text, "utf8");
-      ctx.ui.notify(`Original English written to ${path}`, "info");
+      try {
+        await writeFile(path, text, "utf8");
+        ctx.ui.notify(`Original English written to ${path}`, "info");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        ctx.ui.notify(`Failed to write mirror: ${message}`, "error");
+      }
     },
   });
 
