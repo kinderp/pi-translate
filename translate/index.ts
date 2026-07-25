@@ -1,5 +1,14 @@
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type {
+  AgentMessage,
+  ExtensionAPI,
+  ExtensionContext,
+  InputEvent,
+  MessageEndEvent,
+} from "@earendil-works/pi-coding-agent";
+import type { AssistantMessage, TextContent, UserMessage } from "@earendil-works/pi-ai";
+import { createTranslator, safeTranslate } from "./backends.ts";
 import { loadConfig, saveConfig, type Config } from "./config.ts";
+import type { PiTranslateMeta } from "./types.ts";
 
 const STATUS_PREFIX = "⇄";
 
@@ -14,11 +23,62 @@ function updateStatus(cfg: Config, ctx: ExtensionContext): void {
   ctx.ui.setStatus("translate", ctx.ui.theme.fg("accent", label));
 }
 
+function isUserMessage(msg: AgentMessage): msg is UserMessage {
+  return msg.role === "user";
+}
+
+function isAssistantMessage(msg: AgentMessage): msg is AssistantMessage {
+  return msg.role === "assistant";
+}
+
+function extractText(content: string | (TextContent | { type: "image" })[]): string {
+  if (typeof content === "string") return content;
+  return content
+    .filter((c): c is TextContent => c.type === "text")
+    .map((c) => c.text)
+    .join("\n");
+}
+
+function setTranslatedContent(
+  msg: UserMessage,
+  enText: string,
+): void {
+  if (typeof msg.content === "string") {
+    (msg as UserMessage & { piTranslate: PiTranslateMeta }).piTranslate.en = enText;
+    return;
+  }
+
+  // Array content: preserve non-text blocks (e.g. images), replace the first
+  // text block with the full translation and drop subsequent text blocks.
+  const translatedContent: (TextContent | { type: "image" })[] = [];
+  let textReplaced = false;
+  for (const c of msg.content) {
+    if (c.type === "text") {
+      if (!textReplaced) {
+        translatedContent.push({ type: "text", text: enText });
+        textReplaced = true;
+      }
+    } else {
+      translatedContent.push(c);
+    }
+  }
+  if (!textReplaced) {
+    translatedContent.push({ type: "text", text: enText });
+  }
+  (msg as UserMessage & { piTranslate: PiTranslateMeta }).piTranslate.en = translatedContent;
+}
+
 export default function (pi: ExtensionAPI): void {
   let cfg: Config = loadConfig();
+  const pending = new Map<string, string>();
+  const contextCache = new Map<string, string>();
+  let lastErrorNotified = false;
 
   pi.on("session_start", async (_event, ctx) => {
     cfg = loadConfig();
+    pending.clear();
+    contextCache.clear();
+    lastErrorNotified = false;
     updateStatus(cfg, ctx);
   });
 
@@ -33,5 +93,108 @@ export default function (pi: ExtensionAPI): void {
         "info",
       );
     },
+  });
+
+  pi.on("input", async (event: InputEvent, ctx) => {
+    if (!cfg.enabled) return { action: "continue" };
+    if (event.source === "extension") return { action: "continue" };
+
+    const text = event.text.trim();
+    if (!text) return { action: "continue" };
+
+    // Skip slash commands/templates and bash prefixes
+    if (text.startsWith("/") || text.startsWith("!")) {
+      return { action: "continue" };
+    }
+
+    const translator = createTranslator(cfg, ctx.modelRegistry);
+    const result = await safeTranslate(
+      translator,
+      text,
+      cfg.sourceLang,
+      "en",
+      { protectCode: cfg.protectCode, signal: ctx.signal },
+    );
+
+    if (result.error) {
+      if (!lastErrorNotified) {
+        lastErrorNotified = true;
+        ctx.ui.notify(`Translation failed: ${result.error}`, "warning");
+      }
+    } else {
+      lastErrorNotified = false;
+    }
+
+    pending.set(text, result.text);
+    return { action: "continue" };
+  });
+
+  pi.on("message_end", async (event: MessageEndEvent) => {
+    const msg = event.message;
+    if (!cfg.enabled) return;
+
+    if (isUserMessage(msg)) {
+      const originalText = extractText(msg.content);
+      const enText = pending.get(originalText) ?? contextCache.get(originalText);
+      if (!enText) return;
+
+      const meta: PiTranslateMeta = {
+        sourceLang: cfg.sourceLang,
+        targetLang: "en",
+        backend: cfg.backend,
+      };
+      (msg as UserMessage & { piTranslate: PiTranslateMeta }).piTranslate = meta;
+      setTranslatedContent(msg, enText);
+      pending.delete(originalText);
+      return { message: msg };
+    }
+
+    return;
+  });
+
+  pi.on("context", async (event, ctx) => {
+    if (!cfg.enabled) return;
+
+    const messages = event.messages;
+    const translator = createTranslator(cfg, ctx.modelRegistry);
+
+    for (const msg of messages) {
+      if (!isUserMessage(msg)) continue;
+
+      const translated = (msg as UserMessage & { piTranslate?: PiTranslateMeta }).piTranslate?.en;
+      if (translated !== undefined) {
+        msg.content = translated;
+        continue;
+      }
+
+      const originalText = extractText(msg.content);
+      const cached = contextCache.get(originalText);
+      if (cached) {
+        msg.content = cached;
+        continue;
+      }
+
+      const result = await safeTranslate(
+        translator,
+        originalText,
+        cfg.sourceLang,
+        "en",
+        { protectCode: cfg.protectCode },
+      );
+      contextCache.set(originalText, result.text);
+      if (typeof msg.content === "string") {
+        msg.content = result.text;
+      } else {
+        const fallbackContent: (TextContent | { type: "image" })[] = [
+          { type: "text", text: result.text },
+        ];
+        for (const c of msg.content) {
+          if (c.type !== "text") fallbackContent.push(c);
+        }
+        msg.content = fallbackContent;
+      }
+    }
+
+    return { messages };
   });
 }
