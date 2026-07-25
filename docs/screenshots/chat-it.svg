@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="340" viewBox="0 0 640 340">
+  <rect width="640" height="340" rx="12" fill="#0d1117"/>
+  <rect x="16" y="16" width="608" height="308" rx="8" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+  <!-- header -->
+  <rect x="16" y="16" width="608" height="34" rx="8" fill="#21262d"/>
+  <circle cx="36" cy="33" r="5" fill="#ff5f56"/>
+  <circle cx="54" cy="33" r="5" fill="#ffbd2e"/>
+  <circle cx="72" cy="33" r="5" fill="#27c93f"/>
+  <text x="320" y="38" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8b949e" text-anchor="middle">pi session — /lab/azzuici</text>
+  <!-- user msg -->
+  <rect x="42" y="72" width="520" height="48" rx="8" fill="#1f6feb" opacity="0.18"/>
+  <text x="58" y="92" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#58a6ff">user</text>
+  <text x="58" y="110" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#c9d1d9">Scrivi un server HTTP minimale in Python.</text>
+  <!-- assistant msg -->
+  <rect x="42" y="144" width="556" height="136" rx="8" fill="#21262d"/>
+  <text x="58" y="166" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#3fb950">assistant</text>
+  <text x="58" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#c9d1d9">Ecco un esempio con http.server:</text>
+  <rect x="58" y="204" width="522" height="58" rx="6" fill="#0d1117"/>
+  <text x="70" y="224" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#ff7b72">python</text>
+  <text x="70" y="244" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#c9d1d9">python -m http.server 8000</text>
+  <!-- footer status -->
+  <text x="592" y="314" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#58a6ff" text-anchor="end">⇄ it</text>
+</svg>
