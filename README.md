@@ -17,7 +17,9 @@
 - **Original English on demand** — press `Ctrl+Shift+E` to open a native overlay panel with the untouched response.
 - **Code stays intact** — fenced blocks, inline code, `@file` references, URLs and absolute paths are protected during translation.
 
-![chat in Italian](docs/screenshots/chat-it.svg)
+<p align="center">
+  <img src="docs/screenshots/chat-it.svg" alt="chat in Italian" width="640">
+</p>
 
 ---
 
@@ -41,7 +43,9 @@ Default config is written to `~/.pi/agent/translate.json`.
 
 ## ⌨️ Four commands to know
 
-![commands](docs/screenshots/commands.svg)
+<p align="center">
+  <img src="docs/screenshots/commands.svg" alt="commands" width="640">
+</p>
 
 | Command | What it does |
 |---|---|
@@ -58,7 +62,9 @@ More: `/translate-lang`, `/translate-mode`, `/translate-protect`, `/translate-st
 
 When the Italian reply is on screen, hit `Ctrl+Shift+E`:
 
-![original English panel](docs/screenshots/panel-en.svg)
+<p align="center">
+  <img src="docs/screenshots/panel-en.svg" alt="original English panel" width="520">
+</p>
 
 The panel scrolls with arrow keys / Page Up / Page Down and closes with `Esc` or `q`.
 
