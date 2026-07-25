@@ -116,9 +116,13 @@ export default function (pi: ExtensionAPI): void {
       { protectCode: cfg.protectCode, signal: ctx.signal },
     );
 
-    if (result.error && !lastErrorNotified) {
-      lastErrorNotified = true;
-      ctx.ui.notify(`Translation failed: ${result.error}`, "warning");
+    if (result.error) {
+      if (!lastErrorNotified) {
+        lastErrorNotified = true;
+        ctx.ui.notify(`Translation failed: ${result.error}`, "warning");
+      }
+    } else {
+      lastErrorNotified = false;
     }
 
     pending.set(text, result.text);
