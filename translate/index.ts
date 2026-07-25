@@ -41,7 +41,7 @@ function extractText(content: string | (TextContent | { type: "image" })[]): str
     .join("\n");
 }
 
-function translateAssistantContent(
+async function translateAssistantContent(
   content: AssistantMessage["content"],
   translator: ReturnType<typeof createTranslator>,
   targetLang: string,
