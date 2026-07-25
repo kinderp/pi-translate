@@ -1,5 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { loadConfig, saveConfig, type Config } from "./config";
+import { loadConfig, saveConfig, type Config } from "./config.ts";
 
 const STATUS_PREFIX = "⇄";
 
