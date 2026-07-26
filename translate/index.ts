@@ -44,6 +44,7 @@ function extractText(content: string | (TextContent | { type: "image" })[]): str
 async function translateAssistantContent(
   content: AssistantMessage["content"],
   translator: ReturnType<typeof createTranslator>,
+  modelLang: string,
   targetLang: string,
   protectCode: boolean,
   signal: AbortSignal | undefined,
@@ -54,7 +55,7 @@ async function translateAssistantContent(
       const result = await safeTranslate(
         translator,
         c.text,
-        "en",
+        modelLang,
         targetLang,
         { protectCode, signal },
       );
@@ -163,6 +164,21 @@ export default function (pi: ExtensionAPI): void {
     },
   });
 
+  pi.registerCommand("translate-model-lang", {
+    description: "Set the language the model reasons in",
+    handler: async (args, ctx) => {
+      const code = args.trim().toLowerCase();
+      if (!code || code.length > 5) {
+        ctx.ui.notify("Usage: /translate-model-lang <code> (e.g. en, es, fr)", "warning");
+        return;
+      }
+      cfg.modelLang = code;
+      contextCache.clear();
+      saveConfig(cfg);
+      ctx.ui.notify(`Model language set to ${code}`, "info");
+    },
+  });
+
   pi.registerCommand("translate-protect", {
     description: "Toggle code/path protection during translation",
     handler: async (_args, ctx) => {
@@ -188,6 +204,7 @@ export default function (pi: ExtensionAPI): void {
         `enabled: ${cfg.enabled}`,
         `backend: ${cfg.backend}`,
         `sourceLang: ${cfg.sourceLang}`,
+        `modelLang: ${cfg.modelLang}`,
         `outputMode: ${cfg.outputMode}`,
         `protectCode: ${cfg.protectCode}`,
         `shortcut: ${cfg.originalShortcut}`,
@@ -197,10 +214,10 @@ export default function (pi: ExtensionAPI): void {
   });
 
   pi.registerCommand("translate-original", {
-    description: "Show the original English response in a panel",
+    description: "Show the original model response in a panel",
     handler: async (_args, ctx) => {
       if (!lastAssistantOriginal) {
-        ctx.ui.notify("No original English response available yet", "warning");
+        ctx.ui.notify("No original model response available yet", "warning");
         return;
       }
       openOriginalPanel(ctx, lastAssistantOriginal);
@@ -208,7 +225,7 @@ export default function (pi: ExtensionAPI): void {
   });
 
   pi.registerCommand("translate-mirror", {
-    description: "Write the original English response to a file",
+    description: "Write the original model response to a file",
     handler: async (args, ctx) => {
       const path = args.trim();
       if (!path) {
@@ -216,13 +233,13 @@ export default function (pi: ExtensionAPI): void {
         return;
       }
       if (!lastAssistantOriginal) {
-        ctx.ui.notify("No original English response available yet", "warning");
+        ctx.ui.notify("No original model response available yet", "warning");
         return;
       }
       const text = originalToText(lastAssistantOriginal.piTranslate.original ?? []);
       try {
         await writeFile(path, text, "utf8");
-        ctx.ui.notify(`Original English written to ${path}`, "info");
+        ctx.ui.notify(`Original model response written to ${path}`, "info");
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         ctx.ui.notify(`Failed to write mirror: ${message}`, "error");
@@ -232,7 +249,7 @@ export default function (pi: ExtensionAPI): void {
 
   pi.registerShortcut("ctrl+shift+e", async (ctx) => {
     if (!lastAssistantOriginal) {
-      ctx.ui.notify("No original English response available yet", "warning");
+      ctx.ui.notify("No original model response available yet", "warning");
       return;
     }
     openOriginalPanel(ctx, lastAssistantOriginal);
@@ -255,7 +272,7 @@ export default function (pi: ExtensionAPI): void {
       translator,
       text,
       cfg.sourceLang,
-      "en",
+      cfg.modelLang,
       { protectCode: cfg.protectCode, signal: ctx.signal },
     );
 
@@ -278,16 +295,16 @@ export default function (pi: ExtensionAPI): void {
 
     if (isUserMessage(msg)) {
       const originalText = extractText(msg.content);
-      const enText = pending.get(originalText) ?? contextCache.get(originalText);
-      if (!enText) return;
+      const modelText = pending.get(originalText) ?? contextCache.get(originalText);
+      if (!modelText) return;
 
       const meta: PiTranslateMeta = {
         sourceLang: cfg.sourceLang,
-        targetLang: "en",
+        targetLang: cfg.modelLang,
         backend: cfg.backend,
       };
       (msg as UserMessage & { piTranslate: PiTranslateMeta }).piTranslate = meta;
-      setTranslatedContent(msg, enText);
+      setTranslatedContent(msg, modelText);
       pending.delete(originalText);
       return { message: msg };
     }
@@ -310,13 +327,14 @@ export default function (pi: ExtensionAPI): void {
         const translatedContent = await translateAssistantContent(
           originalContent,
           translator,
+          cfg.modelLang,
           cfg.sourceLang,
           cfg.protectCode,
           ctx.signal,
         );
 
         const meta: PiTranslateMeta = {
-          sourceLang: "en",
+          sourceLang: cfg.modelLang,
           targetLang: cfg.sourceLang,
           backend: cfg.backend,
           original: originalContent,
@@ -367,7 +385,7 @@ export default function (pi: ExtensionAPI): void {
         translator,
         originalText,
         cfg.sourceLang,
-        "en",
+        cfg.modelLang,
         { protectCode: cfg.protectCode },
       );
       contextCache.set(originalText, result.text);
