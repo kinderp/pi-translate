@@ -12,6 +12,8 @@ export interface LlmBackendConfig {
 export interface Config {
   enabled: boolean;
   sourceLang: string;
+  /** Language the model actually reasons in (default: en) */
+  modelLang: string;
   backend: BackendName;
   outputMode: OutputMode;
   protectCode: boolean;
@@ -24,6 +26,7 @@ export interface Config {
 export const DEFAULT_CONFIG: Config = {
   enabled: true,
   sourceLang: "it",
+  modelLang: "en",
   backend: "google",
   outputMode: "translate",
   protectCode: true,

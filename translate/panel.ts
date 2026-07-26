@@ -33,9 +33,10 @@ export class OriginalPanel implements Component {
     const innerH = Math.max(4, height - 5);
 
     const original = this.state.message.piTranslate.original;
+    const modelLang = this.state.message.piTranslate.sourceLang ?? "en";
     const source = original
       ? this.originalToMarkdown(original)
-      : "_Original English not available_";
+      : `_Original ${modelLang.toUpperCase()} not available_`;
 
     const md = new Markdown(source, 1, 1, getMarkdownTheme());
     this.cachedLines = md.render(innerW);
@@ -43,7 +44,7 @@ export class OriginalPanel implements Component {
     const visible = this.cachedLines.slice(this.scroll, this.scroll + innerH);
     while (visible.length < innerH) visible.push("");
 
-    const title = " Original English ";
+    const title = ` Original ${modelLang.toUpperCase()} `;
     const help = " ↑/↓ PgUp/PgDn scroll • Esc/q close ";
 
     const topBorder = "┌" + title.padEnd(innerW - 1, "─") + "┐";

@@ -4,17 +4,17 @@
 [![License](https://img.shields.io/github/license/kinderp/pi-translate?color=3fb950)](./LICENSE)
 [![pi](https://img.shields.io/badge/built%20for-pi-ff7b72)](https://github.com/earendil-works/pi-coding-agent)
 
-> Write in Italian. Think in English. Read in Italian.
+> Write in Italian. Think in English (or Spanish, French…). Read in Italian.
 
-`pi-translate` is a [pi](https://github.com/earendil-works/pi-coding-agent) extension that silently translates your prompts to English before the model sees them, then translates the model's replies back to your language in the transcript. The original English is always one keystroke away.
+`pi-translate` is a [pi](https://github.com/earendil-works/pi-coding-agent) extension that silently translates your prompts to a model language of your choice before the LLM sees them, then translates the model's replies back to your source language in the transcript. The original model response is always one keystroke away.
 
 ---
 
 ## ✨ What it does
 
-- **Prompts go to the model in English** — every user message is translated before it enters the LLM context.
-- **Replies appear in your language** — assistant messages are translated back at the end of generation.
-- **Original English on demand** — press `Ctrl+Shift+E` to open a native overlay panel with the untouched response.
+- **Prompts go to the model in your chosen language** — every user message is translated before it enters the LLM context.
+- **Replies appear in your source language** — assistant messages are translated back at the end of generation.
+- **Original response on demand** — press `Ctrl+Shift+E` to open a native overlay panel with the untouched model output.
 - **Code stays intact** — fenced blocks, inline code, `@file` references, URLs and absolute paths are protected during translation.
 
 <p align="center">
@@ -63,7 +63,8 @@ pi install /path/to/pi-translate
 |---|---|
 | `/translate` | Toggle the whole extension on or off. |
 | `/translate-backend <backend>` | Switch backend: `google`, `mymemory`, `libretranslate`, `llm`. |
-| `/translate-original` | Open the original-English overlay panel. |
+| `/translate-original` | Open the original model-response overlay panel. |
+| `/translate-model-lang <code>` | Change the language the model reasons in (default `en`). |
 | `Ctrl+Shift+E` | Same as `/translate-original`, instant. |
 
 More: `/translate-lang`, `/translate-mode`, `/translate-protect`, `/translate-status`, `/translate-mirror <path>`.
@@ -72,7 +73,7 @@ More: `/translate-lang`, `/translate-mode`, `/translate-protect`, `/translate-st
 
 ## 🪟 Peek at the original
 
-When the Italian reply is on screen, hit `Ctrl+Shift+E`:
+When the translated reply is on screen, hit `Ctrl+Shift+E`:
 
 <p align="center">
   <img src="docs/screenshots/panel-en.svg" alt="original English panel" width="520">
@@ -90,6 +91,7 @@ The panel scrolls with arrow keys / Page Up / Page Down and closes with `Esc` or
 {
   "enabled": true,
   "sourceLang": "it",
+  "modelLang": "en",
   "backend": "google",
   "outputMode": "translate",
   "protectCode": true,
@@ -109,10 +111,36 @@ The panel scrolls with arrow keys / Page Up / Page Down and closes with `Esc` or
 
 ---
 
+## 🧠 Model language (`modelLang`)
+
+By default the model reasons in **English** (`"modelLang": "en"`). You can change it with:
+
+```bash
+/translate-model-lang es   # Spanish
+/translate-model-lang fr   # French
+/translate-model-lang de   # German
+```
+
+### When it makes sense
+
+- Tasks deeply rooted in another language (literary analysis, legal text, localisation review).
+- Working with reference documents that are already in that language.
+- Experimenting with multilingual models.
+
+### When English is still better
+
+- **Coding and technical tasks**: most training data, docs and tools are in English.
+- **Token cost**: English is usually the most token-efficient language for LLMs.
+- **Reasoning quality**: instruction following and step-by-step reasoning are generally strongest in English.
+
+For most day-to-day work, leave `modelLang` as `en`.
+
+---
+
 ## 🎯 Modes
 
-- **`translate`** (default) — prompts are translated to English; replies are translated back. Original English viewable on demand.
-- **`native`** — prompts are still translated to English, but the model is asked to reply directly in your source language. No output flip, no original panel.
+- **`translate`** (default) — prompts are translated to `modelLang`; replies are translated back to `sourceLang`. Original model response viewable on demand.
+- **`native`** — prompts are still translated to `modelLang`, but the model is asked to reply directly in your source language. No output flip, no original panel.
 
 ---
 
