@@ -1,6 +1,6 @@
 {
   "name": "pi-translate",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "pi extension that translates prompts to English and model responses back to the source language",
   "type": "module",
   "main": "translate/index.ts",
