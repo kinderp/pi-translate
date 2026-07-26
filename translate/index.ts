@@ -76,10 +76,10 @@ function originalToText(original: AssistantMessage["content"]): string {
 
 function setTranslatedContent(
   msg: UserMessage,
-  enText: string,
+  modelText: string,
 ): void {
   if (typeof msg.content === "string") {
-    (msg as UserMessage & { piTranslate: PiTranslateMeta }).piTranslate.en = enText;
+    (msg as UserMessage & { piTranslate: PiTranslateMeta }).piTranslate.model = modelText;
     return;
   }
 
@@ -90,7 +90,7 @@ function setTranslatedContent(
   for (const c of msg.content) {
     if (c.type === "text") {
       if (!textReplaced) {
-        translatedContent.push({ type: "text", text: enText });
+        translatedContent.push({ type: "text", text: modelText });
         textReplaced = true;
       }
     } else {
@@ -98,9 +98,9 @@ function setTranslatedContent(
     }
   }
   if (!textReplaced) {
-    translatedContent.push({ type: "text", text: enText });
+    translatedContent.push({ type: "text", text: modelText });
   }
-  (msg as UserMessage & { piTranslate: PiTranslateMeta }).piTranslate.en = translatedContent;
+  (msg as UserMessage & { piTranslate: PiTranslateMeta }).piTranslate.model = translatedContent;
 }
 
 export default function (pi: ExtensionAPI): void {
@@ -368,7 +368,7 @@ export default function (pi: ExtensionAPI): void {
 
       if (!isUserMessage(msg)) continue;
 
-      const translated = (msg as UserMessage & { piTranslate?: PiTranslateMeta }).piTranslate?.en;
+      const translated = (msg as UserMessage & { piTranslate?: PiTranslateMeta }).piTranslate?.model;
       if (translated !== undefined) {
         msg.content = translated;
         continue;

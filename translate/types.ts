@@ -8,10 +8,10 @@ export interface PiTranslateMeta {
   /** Backend used for the translation */
   backend: string;
   /**
-   * English translation stored on user messages.
+   * Translation in the model language stored on user messages.
    * Shape mirrors the original user message content (string or content blocks).
    */
-  en?: string | TextContent[];
+  model?: string | TextContent[];
   /**
    * Original English assistant message content, stored before translation to Italian.
    */
